@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>本質チェッカー</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #F5F5F3;
+  --surface: #FFFFFF;
+  --text: #1A1A1A;
+  --text-sub: #6B6B6B;
+  --accent: #2C5F7C;
+  --accent-light: #E8F0F5;
+  --border: #E0DDD8;
+  --ai-bg: #F0EDE8;
+  --user-bg: #2C5F7C;
+  --user-text: #FFFFFF;
+  --danger: #C45C4A;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06);
+  --radius: 12px;
+}
+
+html, body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100%;
+  overflow: hidden;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.tab-bar {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 8px;
+  flex-shrink: 0;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 14px 8px 10px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.tab-content {
+  display: none;
+  flex: 1;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+.tab-content.active { display: flex; }
+
+/* ===== Header ===== */
+.chat-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.chat-header-text { font-size: 15px; font-weight: 700; }
+.chat-header-sub { font-size: 11px; color: var(--text-sub); }
+
+.new-btn {
+  margin-left: auto;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text-sub);
+  cursor: pointer;
+}
+
+.new-btn:active { background: var(--bg); }
+
+/* ===== Messages ===== */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.msg {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.msg.ai {
+  background: var(--ai-bg);
+  color: var(--text);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.msg.user {
+  background: var(--user-bg);
+  color: var(--user-text);
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.msg.summary {
+  max-width: 95%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  align-self: stretch;
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.summary-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.summary-section { margin-bottom: 10px; }
+.summary-label { font-size: 11px; font-weight: 700; color: var(--text-sub); margin-bottom: 2px; }
+.summary-value { font-size: 13px; line-height: 1.6; }
+
+.msg.thinking {
+  background: var(--ai-bg);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+  padding: 12px 20px;
+}
+
+.thinking-dots span {
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--text-sub);
+  border-radius: 50%;
+  margin: 0 2px;
+  animation: bounce 1.2s infinite;
+}
+.thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+
+/* ===== Input ===== */
+.chat-input-area {
+  padding: 12px 16px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: none;
+  max-height: 100px;
+  line-height: 1.5;
+  outline: none;
+  background: var(--bg);
+}
+
+.chat-input:focus { border-color: var(--accent); }
+
+.send-btn {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.send-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* ===== Actions ===== */
+.chat-actions {
+  padding: 8px 16px 12px;
+  background: var(--surface);
+  display: flex;
+  gap: 8px;
+}
+
+.chat-actions.hidden { display: none; }
+
+.action-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.action-btn.primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.action-btn:active { transform: scale(0.97); }
+
+/* ===== History ===== */
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.history-empty {
+  text-align: center;
+  color: var(--text-sub);
+  font-size: 13px;
+  padding: 40px 24px;
+  line-height: 1.7;
+}
+
+.history-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.history-item:active { transform: scale(0.98); }
+
+.history-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.history-tag {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.history-date { font-size: 11px; color: var(--text-sub); }
+
+.history-preview {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ===== Modal ===== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 100;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal-content {
+  background: var(--surface);
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  max-width: 500px;
+  max-height: 80dvh;
+  overflow-y: auto;
+  padding: 20px;
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.modal-close {
+  padding: 6px;
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--text-sub);
+}
+
+.modal-summary-section { margin-bottom: 14px; }
+.modal-summary-label { font-size: 11px; font-weight: 700; color: var(--text-sub); margin-bottom: 4px; }
+.modal-summary-value { font-size: 14px; line-height: 1.7; white-space: pre-wrap; }
+
+.modal-delete {
+  margin-top: 16px;
+  padding: 10px;
+  width: 100%;
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+  background: none;
+  color: var(--danger);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ===== Settings ===== */
+.settings-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.setting-group {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.setting-label { font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+
+.setting-desc {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.setting-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  background: var(--bg);
+  outline: none;
+}
+
+.setting-input:focus { border-color: var(--accent); }
+
+.save-settings-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--text);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 200;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="main">整理する</button>
+    <button class="tab-btn" data-tab="history">履歴</button>
+    <button class="tab-btn" data-tab="settings">設定</button>
+  </div>
+
+  <!-- Main -->
+  <div class="tab-content active" id="tab-main">
+    <div class="chat-header">
+      <div>
+        <div class="chat-header-text">本質チェッカー</div>
+        <div class="chat-header-sub" id="chatStatus">何でも入力してください</div>
+      </div>
+      <button class="new-btn" id="newBtn">新規</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-actions hidden" id="chatActions">
+      <button class="action-btn" id="continueBtn">もう少し整理する</button>
+      <button class="action-btn primary" id="saveBtn">保存する</button>
+    </div>
+    <div class="chat-input-area" id="chatInputArea">
+      <textarea class="chat-input" id="chatInput" rows="1" placeholder="何を整理したいですか？"></textarea>
+      <button class="send-btn" id="sendBtn" disabled>↑</button>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="tab-content" id="tab-history">
+    <div class="history-list" id="historyList">
+      <div class="history-empty">まだ記録がありません。</div>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="tab-content" id="tab-settings">
+    <div class="settings-content">
+      <div class="setting-group">
+        <div class="setting-label">GAS Web App URL</div>
+        <div class="setting-desc">Google Apps ScriptのデプロイURLを入力。未設定でもオフラインモードで使えます。</div>
+        <input type="url" class="setting-input" id="gasUrl" placeholder="https://script.google.com/macros/s/...">
+      </div>
+      <div class="setting-group">
+        <div class="setting-label">質問回数の目安</div>
+        <div class="setting-desc">AIが質問する回数の上限（3〜10回）。多いほど深く整理できます。</div>
+        <input type="number" class="setting-input" id="maxQuestions" min="3" max="10" value="7">
+      </div>
+      <button class="save-settings-btn" id="saveSettingsBtn">設定を保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div>
+        <span class="history-tag" id="modalTag"></span>
+        <span class="history-date" id="modalDate" style="margin-left:8px;"></span>
+      </div>
+      <button class="modal-close" id="modalClose">×</button>
+    </div>
+    <div id="modalBody"></div>
+    <button class="modal-delete" id="modalDelete">この記録を削除</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let state = {
+  messages: [],
+  conversationForApi: [],
+  questionCount: 0,
+  isComplete: false,
+  summaryData: null,
+  settings: { gasUrl: '', maxQuestions: 7 },
+  history: []
+};
+
+const $ = id => document.getElementById(id);
+const chatMessages = $('chatMessages');
+const chatInput = $('chatInput');
+const sendBtn = $('sendBtn');
+const chatActions = $('chatActions');
+const chatInputArea = $('chatInputArea');
+const chatStatus = $('chatStatus');
+
+function init() {
+  loadSettings();
+  loadHistory();
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      $('tab-' + btn.dataset.tab).classList.add('active');
+      if (btn.dataset.tab === 'history') renderHistory();
+    });
+  });
+
+  $('newBtn').addEventListener('click', () => {
+    if (state.messages.length > 0 && !state.isComplete) {
+      if (!confirm('整理中の内容は失われます。新規にしますか？')) return;
+    }
+    resetChat();
+  });
+
+  chatInput.addEventListener('input', () => {
+    sendBtn.disabled = !chatInput.value.trim();
+    chatInput.style.height = 'auto';
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px';
+  });
+
+  chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+      e.preventDefault();
+      if (chatInput.value.trim()) sendMessage();
+    }
+  });
+
+  sendBtn.addEventListener('click', sendMessage);
+
+  $('continueBtn').addEventListener('click', () => {
+    chatActions.classList.add('hidden');
+    chatInputArea.style.display = 'flex';
+    state.isComplete = false;
+    state.questionCount = Math.max(0, state.questionCount - 2);
+    chatStatus.textContent = '続きを入力してください';
+    addAiMessage('補足や追加の情報があれば入力してください。');
+  });
+
+  $('saveBtn').addEventListener('click', saveRecord);
+  $('saveSettingsBtn').addEventListener('click', saveSettings);
+
+  $('modalClose').addEventListener('click', () => $('modalOverlay').classList.remove('active'));
+  $('modalOverlay').addEventListener('click', (e) => {
+    if (e.target === $('modalOverlay')) $('modalOverlay').classList.remove('active');
+  });
+  $('modalDelete').addEventListener('click', deleteRecord);
+
+  addAiMessage('何を整理したいですか？\n状況、困っていること、考えたいこと、何でも書いてください。');
+}
+
+function resetChat() {
+  state.messages = [];
+  state.conversationForApi = [];
+  state.questionCount = 0;
+  state.isComplete = false;
+  state.summaryData = null;
+  offlineStep = 0;
+  offlineAskedKeys = [];
+  chatMessages.innerHTML = '';
+  chatActions.classList.add('hidden');
+  chatInputArea.style.display = 'flex';
+  chatInput.value = '';
+  chatInput.placeholder = '何を整理したいですか？';
+  sendBtn.disabled = true;
+  chatStatus.textContent = '何でも入力してください';
+  addAiMessage('何を整理したいですか？\n状況、困っていること、考えたいこと、何でも書いてください。');
+}
+
+function addAiMessage(text) {
+  state.messages.push({ role: 'ai', text });
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.textContent = text;
+  chatMessages.appendChild(div);
+  scrollToBottom();
+}
+
+function addUserMessage(text) {
+  state.messages.push({ role: 'user', text });
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.textContent = text;
+  chatMessages.appendChild(div);
+  scrollToBottom();
+}
+
+function addThinking() {
+  const div = document.createElement('div');
+  div.className = 'msg thinking';
+  div.id = 'thinkingMsg';
+  div.innerHTML = '<div class="thinking-dots"><span></span><span></span><span></span></div>';
+  chatMessages.appendChild(div);
+  scrollToBottom();
+}
+
+function removeThinking() {
+  const el = $('thinkingMsg');
+  if (el) el.remove();
+}
+
+function addSummaryMessage(summary) {
+  const div = document.createElement('div');
+  div.className = 'msg summary';
+  let html = '<div class="summary-title">📋 整理結果</div>';
+  for (const s of summary) {
+    html += '<div class="summary-section">' +
+      '<div class="summary-label">' + escapeHtml(s.label) + '</div>' +
+      '<div class="summary-value">' + escapeHtml(s.value) + '</div></div>';
+  }
+  div.innerHTML = html;
+  chatMessages.appendChild(div);
+  scrollToBottom();
+}
+
+function scrollToBottom() {
+  requestAnimationFrame(() => { chatMessages.scrollTop = chatMessages.scrollHeight; });
+}
+
+// ===== Send =====
+async function sendMessage() {
+  const text = chatInput.value.trim();
+  if (!text) return;
+
+  addUserMessage(text);
+  chatInput.value = '';
+  chatInput.style.height = 'auto';
+  chatInput.placeholder = 'ここに入力...';
+  sendBtn.disabled = true;
+
+  state.conversationForApi.push({ role: 'user', content: text });
+  state.questionCount++;
+  chatStatus.textContent = '整理中（' + state.questionCount + '/' + state.settings.maxQuestions + '）';
+
+  if (!state.settings.gasUrl) {
+    offlineFallback();
+    return;
+  }
+
+  addThinking();
+  chatInput.disabled = true;
+
+  try {
+    const resp = await fetch(state.settings.gasUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'ask',
+        conversation: state.conversationForApi,
+        questionCount: state.questionCount,
+        maxQuestions: state.settings.maxQuestions
+      })
+    });
+
+    const data = await resp.json();
+    removeThinking();
+    chatInput.disabled = false;
+
+    if (data.type === 'question') {
+      state.conversationForApi.push({ role: 'assistant', content: data.text });
+      addAiMessage(data.text);
+      chatInput.focus();
+    } else if (data.type === 'summary') {
+      state.summaryData = data.summary;
+      state.isComplete = true;
+      chatStatus.textContent = '整理完了';
+      addSummaryMessage(data.summary);
+      chatInputArea.style.display = 'none';
+      chatActions.classList.remove('hidden');
+    }
+  } catch (err) {
+    removeThinking();
+    chatInput.disabled = false;
+    addAiMessage('通信エラーが発生しました。設定タブでGAS URLを確認してください。');
+  }
+}
+
+// ===== Offline (smart fallback) =====
+// Detects vague answers and asks follow-ups instead of moving to next topic
+const VAGUE_PATTERNS = [
+  { pattern: /喜ば|満足|いいもの|良いもの|良い物/, followup: 'それは具体的に何ですか？ 価格？ 耐久性？ 使いやすさ？ 何がどうなれば達成ですか？' },
+  { pattern: /品質|クオリティ|質/, followup: '品質とは具体的にどの項目ですか？ 数字で測れますか？' },
+  { pattern: /改善|よくし|向上/, followup: '何がどういう状態から、どうなれば改善と言えますか？' },
+  { pattern: /できるだけ|なるべく|とりあえず/, followup: '具体的にはどの程度ですか？ 数字や基準で言うと？' },
+  { pattern: /たぶん|おそらく|思います|かもしれ/, followup: 'それは確認した事実ですか？ それともあなたの推測ですか？' },
+];
+
+const QUESTION_FLOW = [
+  { key: 'who_end', q: '最終的にこれを使う人・届く人は誰ですか？' },
+  { key: 'who_direct', q: '直接やりとりする相手は誰ですか？' },
+  { key: 'pain', q: 'その人は今、何に困っていますか？（現状の不満）' },
+  { key: 'goal', q: '何がどうなれば成功ですか？ できるだけ具体的に。' },
+  { key: 'fact_check', q: 'それは相手から直接聞いたことですか？ あなたの推測ですか？' },
+  { key: 'why_now', q: 'なぜ今これをやるんですか？ きっかけは？' },
+  { key: 'constraint', q: '期限、予算、技術的な制約はありますか？' },
+  { key: 'measure', q: '成功と失敗をどうやって判断しますか？ 数字で言えますか？' },
+  { key: 'purpose', q: 'これが成功したら、その先に何が起きますか？' },
+];
+
+let offlineStep = 0;
+let offlineAskedKeys = [];
+
+function offlineFallback() {
+  const userMsgs = state.messages.filter(m => m.role === 'user');
+  const lastAnswer = userMsgs[userMsgs.length - 1]?.text || '';
+
+  // Check if last answer is vague
+  const vagueMatch = VAGUE_PATTERNS.find(v => v.pattern.test(lastAnswer));
+  if (vagueMatch && state.questionCount <= state.settings.maxQuestions) {
+    const q = vagueMatch.followup;
+    state.conversationForApi.push({ role: 'assistant', content: q });
+    addAiMessage(q);
+    return;
+  }
+
+  // Check if we've asked enough or run out of questions
+  if (offlineStep >= QUESTION_FLOW.length || state.questionCount > state.settings.maxQuestions) {
+    // Build summary
+    const allUserText = userMsgs.map(m => m.text);
+    const allAiText = state.messages.filter(m => m.role === 'ai').map(m => m.text);
+
+    const summary = [];
+    for (let i = 0; i < allAiText.length && i < allUserText.length; i++) {
+      const q = allAiText[i];
+      const a = allUserText[i];
+      // Determine label from question content
+      let label = '情報';
+      if (/使う人|届く人|相手/.test(q)) label = '関係者';
+      else if (/困って|不満/.test(q)) label = '現状の不満';
+      else if (/成功|ゴール|達成/.test(q)) label = '具体的なゴール';
+      else if (/事実|推測|確認/.test(q)) label = '事実 or 推測';
+      else if (/なぜ今|きっかけ/.test(q)) label = 'きっかけ・背景';
+      else if (/期限|予算|制約/.test(q)) label = '制約条件';
+      else if (/判断|数字/.test(q)) label = '成功の基準';
+      else if (/その先|成功したら/.test(q)) label = '上位の目的';
+      else if (/具体的|どの項目|どの程度/.test(q)) label = '具体化';
+      else if (/何を整理/.test(q)) label = '状況';
+      summary.push({ label, value: a });
+    }
+
+    state.summaryData = summary;
+    state.isComplete = true;
+    chatStatus.textContent = '整理完了';
+    addSummaryMessage(summary);
+    chatInputArea.style.display = 'none';
+    chatActions.classList.remove('hidden');
+    return;
+  }
+
+  // Ask next question
+  const next = QUESTION_FLOW[offlineStep];
+  offlineStep++;
+  offlineAskedKeys.push(next.key);
+  state.conversationForApi.push({ role: 'assistant', content: next.q });
+  addAiMessage(next.q);
+}
+
+// ===== Save =====
+async function saveRecord() {
+  const firstMsg = state.messages.find(m => m.role === 'user')?.text || '';
+  const tag = autoTag(firstMsg);
+
+  const record = {
+    id: Date.now().toString(),
+    date: new Date().toISOString(),
+    tag: tag,
+    messages: state.messages,
+    summary: state.summaryData
+  };
+
+  state.history.unshift(record);
+  localStorage.setItem('honshitsu_history', JSON.stringify(state.history));
+
+  if (state.settings.gasUrl) {
+    try {
+      await fetch(state.settings.gasUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'save', record })
+      });
+    } catch (e) {}
+  }
+
+  showToast('保存しました');
+  resetChat();
+}
+
+function autoTag(text) {
+  const t = text;
+  if (/トラブル|問題|故障|エラー|クレーム|不良|ミス/.test(t)) return 'トラブル対応';
+  if (/会議|打ち合わせ|ミーティング|MTG/.test(t)) return '会議';
+  if (/報告|相談|確認|連絡/.test(t)) return '報告・相談';
+  if (/設計|仕様|企画|計画|プラン/.test(t)) return '設計・企画';
+  if (/見積|価格|コスト|予算|費用/.test(t)) return '見積・コスト';
+  if (/納期|スケジュール|期限|締切/.test(t)) return '納期・日程';
+  if (/改善|効率|DX|自動化/.test(t)) return '改善';
+  if (/お客|顧客|取引先|営業/.test(t)) return '顧客対応';
+  if (/人事|採用|評価|教育|研修/.test(t)) return '人材・教育';
+  return '整理メモ';
+}
+
+// ===== History =====
+function loadHistory() {
+  try {
+    const data = localStorage.getItem('honshitsu_history');
+    state.history = data ? JSON.parse(data) : [];
+  } catch { state.history = []; }
+}
+
+function renderHistory() {
+  const list = $('historyList');
+  if (state.history.length === 0) {
+    list.innerHTML = '<div class="history-empty">まだ記録がありません。</div>';
+    return;
+  }
+
+  list.innerHTML = state.history.map((item, idx) => {
+    const d = new Date(item.date);
+    const ds = (d.getMonth()+1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2,'0');
+    const fm = item.messages.find(m => m.role === 'user')?.text || '';
+    return '<div class="history-item" data-idx="' + idx + '">' +
+      '<div class="history-meta">' +
+      '<span class="history-tag">' + escapeHtml(item.tag || '整理メモ') + '</span>' +
+      '<span class="history-date">' + ds + '</span></div>' +
+      '<div class="history-preview">' + escapeHtml(fm) + '</div></div>';
+  }).join('');
+
+  list.querySelectorAll('.history-item').forEach(el => {
+    el.addEventListener('click', () => showDetail(parseInt(el.dataset.idx)));
+  });
+}
+
+function showDetail(idx) {
+  const item = state.history[idx];
+  if (!item) return;
+
+  const d = new Date(item.date);
+  $('modalTag').textContent = item.tag || '整理メモ';
+  $('modalDate').textContent = d.getFullYear() + '/' + (d.getMonth()+1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2,'0');
+
+  let html = '';
+  if (item.summary) {
+    item.summary.forEach(s => {
+      html += '<div class="modal-summary-section">' +
+        '<div class="modal-summary-label">' + escapeHtml(s.label) + '</div>' +
+        '<div class="modal-summary-value">' + escapeHtml(s.value) + '</div></div>';
+    });
+  }
+
+  html += '<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);">';
+  html += '<div class="modal-summary-label" style="margin-bottom:8px;">会話ログ</div>';
+  item.messages.forEach(m => {
+    const label = m.role === 'user' ? '自分' : 'AI';
+    const color = m.role === 'user' ? 'var(--accent)' : 'var(--text-sub)';
+    html += '<div style="margin-bottom:8px;">' +
+      '<span style="font-size:11px;font-weight:700;color:' + color + ';">' + label + '</span>' +
+      '<div style="font-size:13px;line-height:1.6;">' + escapeHtml(m.text) + '</div></div>';
+  });
+  html += '</div>';
+
+  $('modalBody').innerHTML = html;
+  $('modalDelete').dataset.idx = idx;
+  $('modalOverlay').classList.add('active');
+}
+
+function deleteRecord() {
+  const idx = parseInt($('modalDelete').dataset.idx);
+  if (!confirm('この記録を削除しますか？')) return;
+  state.history.splice(idx, 1);
+  localStorage.setItem('honshitsu_history', JSON.stringify(state.history));
+  $('modalOverlay').classList.remove('active');
+  renderHistory();
+  showToast('削除しました');
+}
+
+// ===== Settings =====
+function loadSettings() {
+  try {
+    const data = localStorage.getItem('honshitsu_settings');
+    if (data) state.settings = JSON.parse(data);
+  } catch {}
+  $('gasUrl').value = state.settings.gasUrl || '';
+  $('maxQuestions').value = state.settings.maxQuestions || 5;
+}
+
+function saveSettings() {
+  state.settings.gasUrl = $('gasUrl').value.trim();
+  state.settings.maxQuestions = parseInt($('maxQuestions').value) || 5;
+  localStorage.setItem('honshitsu_settings', JSON.stringify(state.settings));
+  showToast('設定を保存しました');
+}
+
+// ===== Util =====
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+init();
+</script>
+</body>
+</html>
