@@ -1,0 +1,9 @@
+{
+  "name": "本質チェッカー",
+  "short_name": "本質",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F5F5F3",
+  "theme_color": "#2C5F7C",
+  "icons": []
+}
