@@ -436,7 +436,6 @@ let state = {
   messages: [],
   conversationForApi: [],
   userRoundCount: 0,
-  midSummaryDone: false,
   summaryData: null,
   isSaving: false,
   settings: { gasUrl: '' },
@@ -505,7 +504,6 @@ function resetChat() {
   state.messages = [];
   state.conversationForApi = [];
   state.userRoundCount = 0;
-  state.midSummaryDone = false;
   state.summaryData = null;
   state.isSaving = false;
   chatMessages.innerHTML = '';
@@ -605,8 +603,8 @@ async function sendMessage() {
     summarizeBtn.style.display = 'block';
   }
 
-  // Check if mid-summary should trigger
-  if (state.userRoundCount === 6 && !state.midSummaryDone) {
+  // Mid-summary every 5 rounds
+  if (state.userRoundCount > 0 && state.userRoundCount % 5 === 0) {
     await requestMidSummary();
   }
 
@@ -643,8 +641,6 @@ async function sendMessage() {
 
 // ===== Mid Summary =====
 async function requestMidSummary() {
-  state.midSummaryDone = true;
-
   try {
     const resp = await fetch(state.settings.gasUrl, {
       method: 'POST',
