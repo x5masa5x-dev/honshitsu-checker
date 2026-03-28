@@ -43,7 +43,6 @@ html, body {
   margin: 0 auto;
 }
 
-/* Tabs */
 .tab-bar {
   display: flex;
   background: var(--surface);
@@ -66,10 +65,7 @@ html, body {
   transition: all 0.2s;
 }
 
-.tab-btn.active {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-}
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
 .tab-content {
   display: none;
@@ -80,7 +76,6 @@ html, body {
 
 .tab-content.active { display: flex; }
 
-/* Header */
 .chat-header {
   display: flex;
   align-items: center;
@@ -93,11 +88,7 @@ html, body {
 
 .chat-header-text { font-size: 15px; font-weight: 700; }
 
-.header-btns {
-  margin-left: auto;
-  display: flex;
-  gap: 6px;
-}
+.header-btns { margin-left: auto; display: flex; gap: 6px; }
 
 .header-btn {
   padding: 6px 12px;
@@ -111,16 +102,10 @@ html, body {
 }
 
 .header-btn:active { background: var(--bg); }
-
-.header-btn.primary {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-}
-
+.header-btn:disabled { opacity: 0.4; cursor: default; }
+.header-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
 .header-btn.primary:active { opacity: 0.8; }
 
-/* Messages */
 .chat-messages {
   flex: 1;
   overflow-y: auto;
@@ -146,18 +131,25 @@ html, body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.msg.ai {
-  background: var(--ai-bg);
-  color: var(--text);
-  align-self: flex-start;
-  border-bottom-left-radius: 4px;
+.msg.ai { background: var(--ai-bg); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; }
+.msg.user { background: var(--user-bg); color: var(--user-text); align-self: flex-end; border-bottom-right-radius: 4px; }
+
+.msg.midsummary {
+  max-width: 95%;
+  background: #F8F6F1;
+  border: 1px solid #D4CFC6;
+  align-self: stretch;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.7;
 }
 
-.msg.user {
-  background: var(--user-bg);
-  color: var(--user-text);
-  align-self: flex-end;
-  border-bottom-right-radius: 4px;
+.midsummary-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-bottom: 8px;
 }
 
 .msg.summary {
@@ -169,16 +161,31 @@ html, body {
   padding: 16px;
 }
 
-.summary-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--accent);
-  margin-bottom: 12px;
-}
-
+.summary-title { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 12px; }
 .summary-section { margin-bottom: 10px; }
 .summary-label { font-size: 11px; font-weight: 700; color: var(--text-sub); margin-bottom: 2px; }
 .summary-value { font-size: 13px; line-height: 1.6; }
+
+.summary-actions { margin-top: 12px; display: flex; gap: 8px; }
+
+.summary-action-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.summary-action-btn.primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.summary-action-btn:disabled { opacity: 0.4; cursor: default; }
 
 .msg.thinking {
   background: var(--ai-bg);
@@ -203,7 +210,6 @@ html, body {
   30% { transform: translateY(-6px); }
 }
 
-/* Input */
 .chat-input-area {
   padding: 12px 16px;
   background: var(--surface);
@@ -246,21 +252,8 @@ html, body {
 
 .send-btn:disabled { opacity: 0.4; cursor: default; }
 
-/* History */
-.history-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  -webkit-overflow-scrolling: touch;
-}
-
-.history-empty {
-  text-align: center;
-  color: var(--text-sub);
-  font-size: 13px;
-  padding: 40px 24px;
-  line-height: 1.7;
-}
+.history-list { flex: 1; overflow-y: auto; padding: 16px; -webkit-overflow-scrolling: touch; }
+.history-empty { text-align: center; color: var(--text-sub); font-size: 13px; padding: 40px 24px; line-height: 1.7; }
 
 .history-item {
   background: var(--surface);
@@ -273,23 +266,8 @@ html, body {
 }
 
 .history-item:active { transform: scale(0.98); }
-
-.history-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-}
-
-.history-tag {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--accent);
-  background: var(--accent-light);
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
+.history-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.history-tag { font-size: 11px; font-weight: 500; color: var(--accent); background: var(--accent-light); padding: 2px 8px; border-radius: 4px; }
 .history-date { font-size: 11px; color: var(--text-sub); }
 
 .history-preview {
@@ -302,7 +280,6 @@ html, body {
   overflow: hidden;
 }
 
-/* Modal */
 .modal-overlay {
   display: none;
   position: fixed;
@@ -331,45 +308,20 @@ html, body {
   to { transform: translateY(0); }
 }
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.modal-close {
-  padding: 6px;
-  background: none;
-  border: none;
-  font-size: 22px;
-  cursor: pointer;
-  color: var(--text-sub);
-}
-
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.modal-close { padding: 6px; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-sub); }
 .modal-summary-section { margin-bottom: 14px; }
 .modal-summary-label { font-size: 11px; font-weight: 700; color: var(--text-sub); margin-bottom: 4px; }
 .modal-summary-value { font-size: 14px; line-height: 1.7; white-space: pre-wrap; }
 
 .modal-delete {
-  margin-top: 16px;
-  padding: 10px;
-  width: 100%;
-  border: 1px solid var(--danger);
-  border-radius: 8px;
-  background: none;
-  color: var(--danger);
-  font-family: inherit;
-  font-size: 13px;
-  cursor: pointer;
+  margin-top: 16px; padding: 10px; width: 100%;
+  border: 1px solid var(--danger); border-radius: 8px;
+  background: none; color: var(--danger);
+  font-family: inherit; font-size: 13px; cursor: pointer;
 }
 
-/* Settings */
-.settings-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-}
+.settings-content { flex: 1; overflow-y: auto; padding: 16px; }
 
 .setting-group {
   background: var(--surface);
@@ -380,73 +332,42 @@ html, body {
 }
 
 .setting-label { font-size: 13px; font-weight: 500; margin-bottom: 8px; }
-
-.setting-desc {
-  font-size: 11px;
-  color: var(--text-sub);
-  margin-bottom: 10px;
-  line-height: 1.5;
-}
+.setting-desc { font-size: 11px; color: var(--text-sub); margin-bottom: 10px; line-height: 1.5; }
 
 .setting-input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 13px;
-  background: var(--bg);
-  outline: none;
+  width: 100%; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-family: inherit; font-size: 13px;
+  background: var(--bg); outline: none;
 }
 
 .setting-input:focus { border-color: var(--accent); }
 
 .save-settings-btn {
-  width: 100%;
-  padding: 12px;
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  margin-top: 8px;
+  width: 100%; padding: 12px;
+  background: var(--accent); color: white;
+  border: none; border-radius: 8px;
+  font-family: inherit; font-size: 14px; font-weight: 500;
+  cursor: pointer; margin-top: 8px;
 }
 
 .no-gas-msg {
-  background: var(--accent-light);
-  border: 1px solid var(--accent);
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--text);
-  margin: 16px;
-  text-align: center;
+  background: var(--accent-light); border: 1px solid var(--accent);
+  border-radius: 8px; padding: 12px;
+  font-size: 12px; line-height: 1.6; color: var(--text);
+  margin: 16px; text-align: center;
 }
 
 .toast {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
+  position: fixed; bottom: 80px; left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background: var(--text);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 13px;
-  opacity: 0;
-  transition: all 0.3s;
-  z-index: 200;
-  pointer-events: none;
+  background: var(--text); color: white;
+  padding: 10px 20px; border-radius: 8px;
+  font-size: 13px; opacity: 0;
+  transition: all 0.3s; z-index: 200; pointer-events: none;
 }
 
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
@@ -458,7 +379,6 @@ html, body {
     <button class="tab-btn" data-tab="settings">設定</button>
   </div>
 
-  <!-- Main -->
   <div class="tab-content active" id="tab-main">
     <div class="chat-header">
       <div class="chat-header-text">本質チェッカー</div>
@@ -477,14 +397,12 @@ html, body {
     </div>
   </div>
 
-  <!-- History -->
   <div class="tab-content" id="tab-history">
     <div class="history-list" id="historyList">
       <div class="history-empty">まだ記録がありません。</div>
     </div>
   </div>
 
-  <!-- Settings -->
   <div class="tab-content" id="tab-settings">
     <div class="settings-content">
       <div class="setting-group">
@@ -497,7 +415,6 @@ html, body {
   </div>
 </div>
 
-<!-- Modal -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-content">
     <div class="modal-header">
@@ -518,7 +435,10 @@ html, body {
 let state = {
   messages: [],
   conversationForApi: [],
+  userRoundCount: 0,
+  midSummaryDone: false,
   summaryData: null,
+  isSaving: false,
   settings: { gasUrl: '' },
   history: []
 };
@@ -568,7 +488,6 @@ function init() {
   sendBtn.addEventListener('click', sendMessage);
   summarizeBtn.addEventListener('click', requestSummary);
   $('saveSettingsBtn').addEventListener('click', saveSettings);
-
   $('modalClose').addEventListener('click', () => $('modalOverlay').classList.remove('active'));
   $('modalOverlay').addEventListener('click', (e) => {
     if (e.target === $('modalOverlay')) $('modalOverlay').classList.remove('active');
@@ -585,7 +504,10 @@ function checkGasUrl() {
 function resetChat() {
   state.messages = [];
   state.conversationForApi = [];
+  state.userRoundCount = 0;
+  state.midSummaryDone = false;
   state.summaryData = null;
+  state.isSaving = false;
   chatMessages.innerHTML = '';
   summarizeBtn.style.display = 'none';
   chatInput.value = '';
@@ -597,7 +519,6 @@ function resetChat() {
   addAiMessage('何を整理したいですか？');
 }
 
-// ===== Messages =====
 function addAiMessage(text) {
   state.messages.push({ role: 'ai', text });
   const div = document.createElement('div');
@@ -612,6 +533,15 @@ function addUserMessage(text) {
   const div = document.createElement('div');
   div.className = 'msg user';
   div.textContent = text;
+  chatMessages.appendChild(div);
+  scrollToBottom();
+}
+
+function addMidSummaryMessage(text) {
+  state.messages.push({ role: 'ai', text: '【中間整理】\n' + text });
+  const div = document.createElement('div');
+  div.className = 'msg midsummary';
+  div.innerHTML = '<div class="midsummary-title">📝 ここまでの整理</div>' + escapeHtml(text);
   chatMessages.appendChild(div);
   scrollToBottom();
 }
@@ -639,12 +569,18 @@ function addSummaryMessage(summary) {
       '<div class="summary-label">' + escapeHtml(s.label) + '</div>' +
       '<div class="summary-value">' + escapeHtml(s.value) + '</div></div>';
   }
-  html += '<div style="margin-top:12px;display:flex;gap:8px;">' +
-    '<button onclick="saveRecord()" style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:white;font-family:inherit;font-size:12px;cursor:pointer;">保存する</button>' +
-    '<button onclick="continueTalking()" style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:12px;cursor:pointer;">続ける</button></div>';
+  html += '<div class="summary-actions">' +
+    '<button class="summary-action-btn primary" id="saveRecordBtn">保存する</button>' +
+    '<button class="summary-action-btn" id="continueBtn">続ける</button></div>';
   div.innerHTML = html;
   chatMessages.appendChild(div);
   scrollToBottom();
+
+  $('saveRecordBtn').addEventListener('click', function() {
+    this.disabled = true;
+    saveRecord();
+  });
+  $('continueBtn').addEventListener('click', continueTalking);
 }
 
 function scrollToBottom() {
@@ -663,10 +599,15 @@ async function sendMessage() {
   sendBtn.disabled = true;
 
   state.conversationForApi.push({ role: 'user', content: text });
+  state.userRoundCount++;
 
-  // Show summarize button after first exchange
-  if (state.conversationForApi.length >= 2) {
+  if (state.userRoundCount >= 2) {
     summarizeBtn.style.display = 'block';
+  }
+
+  // Check if mid-summary should trigger
+  if (state.userRoundCount === 6 && !state.midSummaryDone) {
+    await requestMidSummary();
   }
 
   addThinking();
@@ -700,7 +641,31 @@ async function sendMessage() {
   }
 }
 
-// ===== Summarize =====
+// ===== Mid Summary =====
+async function requestMidSummary() {
+  state.midSummaryDone = true;
+
+  try {
+    const resp = await fetch(state.settings.gasUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'midsummary',
+        conversation: state.conversationForApi
+      })
+    });
+
+    const data = await resp.json();
+    if (data.text) {
+      addMidSummaryMessage(data.text);
+      state.conversationForApi.push({ role: 'assistant', content: '【中間整理】' + data.text });
+    }
+  } catch (err) {
+    // Mid-summary failed silently, continue with dialog
+  }
+}
+
+// ===== Final Summary =====
 async function requestSummary() {
   if (!state.settings.gasUrl || state.conversationForApi.length < 2) return;
 
@@ -736,11 +701,14 @@ async function requestSummary() {
 }
 
 function continueTalking() {
-  addAiMessage('続けましょう。何か補足や別の角度から考えたいことはありますか？');
+  addAiMessage('何か補足や、別の角度から考えたいことはありますか？');
 }
 
 // ===== Save =====
 async function saveRecord() {
+  if (state.isSaving) return;
+  state.isSaving = true;
+
   const firstMsg = state.messages.find(m => m.role === 'user')?.text || '';
   const tag = autoTag(firstMsg);
 
@@ -780,10 +748,11 @@ function autoTag(text) {
   if (/お客|顧客|取引先|営業/.test(text)) return '顧客対応';
   if (/商品|製品|新規|開発|試作/.test(text)) return '商品開発';
   if (/人事|採用|評価|教育|研修/.test(text)) return '人材・教育';
+  if (/悩|迷|判断|決断/.test(text)) return '意思決定';
+  if (/買|発注|仕入|購入/.test(text)) return '調達・購買';
   return '整理メモ';
 }
 
-// ===== History =====
 function loadHistory() {
   try {
     const data = localStorage.getItem('honshitsu_history');
@@ -857,7 +826,6 @@ function deleteRecord() {
   showToast('削除しました');
 }
 
-// ===== Settings =====
 function loadSettings() {
   try {
     const data = localStorage.getItem('honshitsu_settings');
@@ -873,7 +841,6 @@ function saveSettings() {
   showToast('設定を保存しました');
 }
 
-// ===== Util =====
 function escapeHtml(str) {
   const d = document.createElement('div');
   d.textContent = str;
